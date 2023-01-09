@@ -52,7 +52,7 @@ public:
 
 	// actor Ã£±â
 	template<typename T>
-	static void FindActors(class UWorld* InWorld, TArray<T*>& OutActors)
+	static void FindActors(class UWorld* InWorld, TArray<T *>& OutActors)
 	{
 		OutActors.Empty();
 

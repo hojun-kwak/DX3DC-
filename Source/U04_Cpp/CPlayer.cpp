@@ -1,5 +1,6 @@
 #include "CPlayer.h"
 #include "Global.h"
+#include "CRifle.h"
 #include "CAnimInstance.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -62,6 +63,11 @@ void ACPlayer::BeginPlay()
 	GetMesh()->SetMaterial(0, BodyMaterial);
 	GetMesh()->SetMaterial(1, LogoMaterial);
 
+	Rifle = ACRifle::Spawn(GetWorld(), this);
+
+	// 라이플시작
+	OnRifle();
+
 }
 
 void ACPlayer::Tick(float DeltaTime)
@@ -70,6 +76,7 @@ void ACPlayer::Tick(float DeltaTime)
 
 }
 
+// 세팅 - 입력
 void ACPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -82,6 +89,9 @@ void ACPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 	PlayerInputComponent->BindAction("Running", EInputEvent::IE_Pressed, this, &ACPlayer::OnRunning);
 	PlayerInputComponent->BindAction("Running", EInputEvent::IE_Released, this, &ACPlayer::OffRunning);
+
+	PlayerInputComponent->BindAction("Rifle", EInputEvent::IE_Pressed, this, &ACPlayer::OnRifle);
+
 
 }
 
@@ -119,6 +129,18 @@ void ACPlayer::OnRunning()
 void ACPlayer::OffRunning()
 {
 	GetCharacterMovement()->MaxWalkSpeed = 400;
+}
+
+void ACPlayer::OnRifle()
+{
+	if (Rifle->GetEquipped())
+	{
+		Rifle->UnEquip();
+
+		return;
+	}
+
+	Rifle->Equip();
 }
 
 // C10_Override

@@ -22,6 +22,9 @@ protected:
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Animation")
 		float Speed;
 
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Animation")
+		bool bEquipped;
+
 private:
 	class ACharacter* OwnerCharacter;
 };
