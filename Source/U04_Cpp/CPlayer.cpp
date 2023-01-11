@@ -8,7 +8,8 @@
 #include "Components/CapsuleComponent.h"
 #include "Materials/MaterialInstanceConstant.h"
 #include "Materials/MaterialInstanceDynamic.h"
-#include "Widget/C_MyUserWidget_CrossHair.h"
+//#include "Widget/C_MyUserWidget_CrossHair.h"
+#include "Widget/CUserWidget_CrossHair.h"
 
 ACPlayer::ACPlayer()
 {
@@ -45,12 +46,9 @@ ACPlayer::ACPlayer()
 	CHelpers::GetClass<UAnimInstance>(&animInstance, "AnimBlueprint'/Game/ABP_CPlayer.ABP_CPlayer_C'");
 	GetMesh()->SetAnimInstanceClass(animInstance);
 
-
-	// WidgetBlueprint'/Game/Widgets/WB_CrossHair.WB_CrossHair'
+	// WidgetBlueprint'/Game/Widgets/WD_CrossHair.WD_CrossHair'
 	//CHelpers::GetClass<UC_MyUserWidget_CrossHair>(&CrossHairClass, "WidgetBlueprint'/Game/Widgets/WB_CrossHair.WB_CrossHair_C'");
-
-	
-
+	//CHelpers::GetClass<UCUserWidget_CrossHair>(&CrossHairClass, "WidgetBlueprint'/Game/Widgets/WB_CrossHair.WB_CrossHair'");
 }
 
 void ACPlayer::BeginPlay()
@@ -70,9 +68,10 @@ void ACPlayer::BeginPlay()
 	GetMesh()->SetMaterial(0, BodyMaterial);
 	GetMesh()->SetMaterial(1, LogoMaterial);
 
+	
 
 	// widget Ãß°¡
-	/*CrossHair = CreateWidget<UC_MyUserWidget_CrossHair, APlayerController>(GetController<APlayerController>(), CrossHairClass);
+	/*CrossHair = CreateWidget<UCUserWidget_CrossHair, APlayerController>(GetController<APlayerController>(), CrossHairClass);
 	CrossHair->AddToViewport();*/
 	//CrossHair->SetVisibility(ESlateVisibility::Hidden);
 

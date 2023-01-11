@@ -1,1 +1,1 @@
-#include "IRifle.h"\
+#include "IRifle.h"

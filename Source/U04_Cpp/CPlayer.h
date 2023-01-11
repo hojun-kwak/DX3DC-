@@ -10,10 +10,10 @@ class U04_CPP_API ACPlayer : public ACharacter, public IIRifle
 {
 	GENERATED_BODY()
 
-//private:
+private:
 	// 외부에서 접근 가능한 CrossHairClass
-	/*UPROPERTY(EditDefaultsOnly, Category = "Widgets")
-		TSubclassOf<class UC_MyUserWidget_CrossHair> CrossHairClass;*/
+	UPROPERTY(EditDefaultsOnly, Category = "Widgets")
+		TSubclassOf<class UCUserWidget_CrossHair> CrossHairClass;
 
 private:
 	UPROPERTY(VisibleDefaultsOnly)
@@ -78,4 +78,5 @@ private:
 	// 헤더 꼬임현상을 해결하실 위해서, CPP헤더를 인식시키기
 	class ACRifle* Rifle;
 	//class UC_MyUserWidget_CrossHair* CrossHair;
+	class UCUserWidget_CrossHair* CrossHair;
 };
