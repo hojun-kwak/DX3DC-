@@ -37,9 +37,18 @@ public:
 	void Begin_UnEquip();
 	void End_UnEquip();
 
+	void Begin_Aiming();
+	void End_Aiming();
+
+
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+public:
+	virtual void Tick(float DeltaTime) override;
+	
 
 public:
 	static ACRifle* Spawn(class UWorld* InWorld, class ACharacter* InOwner);
@@ -48,6 +57,7 @@ public:
 	// 최적화
 	FORCEINLINE bool GetEquipped() { return bEquipped; }
 	FORCEINLINE bool GetEquipping() { return bEquipping; }
+	FORCEINLINE bool GetAiming() { return bAiming; }
 
 private:
 	class ACharacter* OwnerCharacter;
@@ -55,5 +65,6 @@ private:
 // 장착되었는지 확인하는 변수
 	bool bEquipped;
 	bool bEquipping;
+	bool bAiming;
 
 };
