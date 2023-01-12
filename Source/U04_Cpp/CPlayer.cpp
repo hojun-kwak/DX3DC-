@@ -5,10 +5,11 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Camera/PlayerCameraManager.h"
+#include "Camera/CameraShakeBase.h"
 #include "Components/CapsuleComponent.h"
 #include "Materials/MaterialInstanceConstant.h"
 #include "Materials/MaterialInstanceDynamic.h"
-//#include "Widget/C_MyUserWidget_CrossHair.h"
 #include "Widget/CUserWidget_CrossHair.h"
 
 ACPlayer::ACPlayer()
@@ -47,8 +48,8 @@ ACPlayer::ACPlayer()
 	GetMesh()->SetAnimInstanceClass(animInstance);
 
 	// WidgetBlueprint'/Game/Widgets/WD_CrossHair.WD_CrossHair'
-	//CHelpers::GetClass<UC_MyUserWidget_CrossHair>(&CrossHairClass, "WidgetBlueprint'/Game/Widgets/WB_CrossHair.WB_CrossHair_C'");
-	//CHelpers::GetClass<UCUserWidget_CrossHair>(&CrossHairClass, "WidgetBlueprint'/Game/Widgets/WB_CrossHair.WB_CrossHair'");
+	CHelpers::GetClass<UCUserWidget_CrossHair>(&CrossHairClass, "WidgetBlueprint'/Game/Widget/WD_CrossHair.WD_CrossHair_C'");
+	CHelpers::GetClass<UCameraShakeBase>(&CameraShakeClass, "Blueprint'/Game/BP_CameraShake.BP_CameraShake_C'");
 }
 
 void ACPlayer::BeginPlay()
@@ -71,9 +72,9 @@ void ACPlayer::BeginPlay()
 	
 
 	// widget 추가
-	/*CrossHair = CreateWidget<UCUserWidget_CrossHair, APlayerController>(GetController<APlayerController>(), CrossHairClass);
-	CrossHair->AddToViewport();*/
-	//CrossHair->SetVisibility(ESlateVisibility::Hidden);
+	CrossHair = CreateWidget<UCUserWidget_CrossHair, APlayerController>(GetController<APlayerController>(), CrossHairClass);
+	CrossHair->AddToViewport();
+	CrossHair->SetVisibility(ESlateVisibility::Hidden);
 
 	Rifle = ACRifle::Spawn(GetWorld(), this);
 
@@ -111,6 +112,8 @@ void ACPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAction("Aim", EInputEvent::IE_Pressed, this, &ACPlayer::OnAim);
 	PlayerInputComponent->BindAction("Aim", EInputEvent::IE_Released, this, &ACPlayer::OffAim);
 
+	PlayerInputComponent->BindAction("Fire", EInputEvent::IE_Pressed, this, &ACPlayer::OnFire);
+	PlayerInputComponent->BindAction("Fire", EInputEvent::IE_Released, this, &ACPlayer::OffFire);
 
 }
 
@@ -128,6 +131,21 @@ void ACPlayer::GetLocationAndDirection(FVector& OutStart, FVector& OutEnd, FVect
 	conDirection *= 3000.0f;
 
 	OutEnd = cameraLocation + conDirection; // 총알이 끝나는 지점
+}
+
+void ACPlayer::OnFocus()
+{
+	CrossHair->OnFocus();
+}
+
+void ACPlayer::OffFocus()
+{
+	CrossHair->OffFocus();
+}
+
+void ACPlayer::PlayCameraShake()
+{
+	GetWorld()->GetFirstPlayerController()->ClientStartCameraShake(CameraShakeClass);
 }
 
 void ACPlayer::OnMoveForward(float Axis)
@@ -194,7 +212,7 @@ void ACPlayer::OnAim()
 	OnZoomIn();
 
 	Rifle->Begin_Aiming();
-	//CrossHair->SetVisibility(ESlateVisibility::Hidden);
+	CrossHair->SetVisibility(ESlateVisibility::Visible);
 }
 
 void ACPlayer::OffAim()
@@ -212,7 +230,17 @@ void ACPlayer::OffAim()
 	// 블프에 커브 추가해야만 사용가능
 	OnZoomOut();
 	Rifle->End_Aiming();
-	//CrossHair->SetVisibility(ESlateVisibility::Visible);
+	CrossHair->SetVisibility(ESlateVisibility::Hidden);
+}
+
+void ACPlayer::OnFire()
+{
+	Rifle->Begin_Fire();
+}
+
+void ACPlayer::OffFire()
+{
+	Rifle->End_Fire();
 }
 
 // C10_Override

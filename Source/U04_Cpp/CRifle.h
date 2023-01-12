@@ -24,7 +24,10 @@ private:
 
 	UPROPERTY(VisibleDefaultsOnly, Category = "Rifle")
 		class UAnimMontage* UngrabMontage;
-	
+
+	UPROPERTY(VisibleDefaultsOnly, Category = "Rifle")
+		class UAnimMontage* FireMontage;
+
 public:	
 	// Sets default values for this actor's properties
 	ACRifle();
@@ -40,7 +43,9 @@ public:
 	void Begin_Aiming();
 	void End_Aiming();
 
-
+	void Begin_Fire();
+	void Firing();
+	void End_Fire();
 
 protected:
 	// Called when the game starts or when spawned
@@ -66,5 +71,6 @@ private:
 	bool bEquipped;
 	bool bEquipping;
 	bool bAiming;
+	bool bFiring;
 
 };
