@@ -49,6 +49,12 @@ public:
 
 		InActor->SetRootComponent((*InComponent));
 	}
+	// actor component
+	template<typename T>
+	static void CreateActorComponent(AActor* InActor, T** InComponent, FName InName)
+	{
+		*InComponent = InActor->CreateDefaultSubobject<T>(InName);
+	}
 
 	// actor Ã£±â
 	template<typename T>

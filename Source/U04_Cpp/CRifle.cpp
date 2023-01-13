@@ -5,6 +5,10 @@
 #include "Animation/AnimMontage.h"
 #include "Engine/StaticMeshActor.h"
 #include "GameFramework/Character.h"
+#include "Particles/ParticleSystem.h"
+#include "Sound/SoundCue.h"
+#include "CBullet.h"
+#include "Materials/MaterialInstanceConstant.h"
 #include "Components/SkeletalMeshComponent.h"
 
 // Sets default values
@@ -25,6 +29,19 @@ ACRifle::ACRifle()
 	CHelpers::GetAsset<UAnimMontage>(&UngrabMontage, "AnimMontage'/Game/Character/Montages/Rifle_Ungrab_Montage.Rifle_Ungrab_Montage'");
 	CHelpers::GetAsset<UAnimMontage>(&FireMontage, "AnimMontage'/Game/Character/Montages/Rifle_Fire_Montage.Rifle_Fire_Montage'");
 
+	// 01.13
+	//ParticleSystem'/Game/Particles_Rifle/Particles/VFX_Eject_bullet.VFX_Eject_bullet'
+	CHelpers::GetAsset<UParticleSystem>(&FlashParticle, "ParticleSystem'/Game/Particles_Rifle/Particles/VFX_Muzzleflash.VFX_Muzzleflash'");
+	CHelpers::GetAsset<UParticleSystem>(&EjectParticle, "ParticleSystem'/Game/Particles_Rifle/Particles/VFX_Eject_bullet.VFX_Eject_bullet'");
+	CHelpers::GetAsset<UParticleSystem>(&ImpactParticle, "ParticleSystem'/Game/Particles_Rifle/Particles/VFX_Impact_Default.VFX_Impact_Default'");
+	
+	//SoundCue'/Game/Sounds/S_RifleShoot_Cue.S_RifleShoot_Cue'
+	CHelpers::GetAsset<USoundCue>(&FireSoundCue, "SoundCue'/Game/Sounds/S_RifleShoot_Cue.S_RifleShoot_Cue'");
+
+	// 불렛 추가
+	CHelpers::GetClass<ACBullet>(&BulletClass, "Blueprint'/Game/BP_CBullet.BP_CBullet_C'");
+
+	CHelpers::GetAsset< UMaterialInstanceConstant>(&DecalMaterial, "MaterialInstanceConstant'/Game/Materials/M_Decal_Inst.M_Decal_Inst'");
 }
 
 void ACRifle::Equip()
@@ -102,12 +119,32 @@ void ACRifle::Firing()
 	if (!!player)
 		player->PlayCameraShake();
 
+	// 탄피 및 총구폭발 파티클을 총에 붙이기
+	UGameplayStatics::SpawnEmitterAttached(FlashParticle, Mesh, "MuzzleFlash", FVector::ZeroVector, FRotator::ZeroRotator, EAttachLocation::KeepRelativeOffset);
+	UGameplayStatics::SpawnEmitterAttached(EjectParticle, Mesh, "EjectBullet", FVector::ZeroVector, FRotator::ZeroRotator, EAttachLocation::KeepRelativeOffset);
+
+	// 소켓위치 가져와서 월드의 플레이한다
+	FVector muzzleLocation = Mesh->GetSocketLocation("MuzzleFlash");
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), FireSoundCue, muzzleLocation);
+
+	// 전방을 가져온다.
+	if (!!BulletClass)
+		GetWorld()->SpawnActor<ACBullet>(BulletClass, muzzleLocation, direction.Rotation());
+
+
 	FCollisionQueryParams params;
 	params.AddIgnoredActor(this);
 	params.AddIgnoredActor(OwnerCharacter);
 
 	FHitResult hitResult;
 
+	// 탄흔자국
+	if (GetWorld()->LineTraceSingleByChannel(hitResult, start, end, ECollisionChannel::ECC_Visibility, params))
+	{
+		FRotator rotator = hitResult.ImpactNormal.Rotation(); // 충돌되는벡터의 수직을 리턴
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticle, hitResult.Location, rotator, FVector(2));
+		UGameplayStatics::SpawnDecalAtLocation(GetWorld(), DecalMaterial, FVector(5), hitResult.Location, rotator, 10.0f);
+	}
 
 	if (GetWorld()->LineTraceSingleByChannel(hitResult, start, end, ECollisionChannel::ECC_WorldDynamic, params))
 	{
@@ -122,6 +159,7 @@ void ACRifle::Firing()
 					direction = staticMeshActor->GetActorLocation() - OwnerCharacter->GetActorLocation();
 					direction.Normalize();
 
+					// 물리설정, 밀리는것
 					meshComponent->AddImpulseAtLocation(direction * meshComponent->GetMass() * 100, OwnerCharacter->GetActorLocation());
 
 					return;
